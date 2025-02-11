@@ -46,5 +46,3 @@ res = chain_email.invoke({"job_description": str(job), "link_list": links})
 print(res.content)
 
 Now we have Cold Email
-
-——————————————————————————————————————————————————————————————————————————————
