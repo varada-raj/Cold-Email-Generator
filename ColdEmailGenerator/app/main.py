@@ -12,7 +12,6 @@ pass the data to the model to extract jobs
 for every job retrive the skills , pass the skills to chromadb search to retrive relevent links for the skills.
 pass the job, links, to the model to generate the cold email
 write the email to the web interface as a code snippet.
-
 """
 import streamlit as st
 from langchain_community.document_loaders import WebBaseLoader
