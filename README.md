@@ -1,48 +1,89 @@
-# Cold-Email-Generator
+# **🚀 AI-Powered Cold Email Generation**  
 
-Cold Email Generator: 
-https://colab.research.google.com/drive/1hq1XoYaUP1W10CTJOWIhzd39NcQJs2cB#scrollTo=U_2XpLkhFuRo
+## **📌 Overview**  
+This project automates the process of generating **B2B cold emails** using **LLMs** and **vector databases**. Companies often hire professionals from other firms for projects. To facilitate this, organizations send cold emails to address staffing requirements by extracting job postings from official websites.  
 
+Our system leverages **LangChain**, **LLMs**, and **ChromaDB** to streamline this process by automatically generating **personalized cold emails** based on extracted job descriptions.  
 
-B to B , companies hire people from other companies for a projects
-Ex: Kittu , where he got placed in delloite, but works in uber. So here uber addresses uber that they will provide people to uber for work, so for that delloite sends a COLD EMAIL for uber to address the requirement , where delloite searches for in their official website.
+---
 
+## **🔹 Project Workflow**  
 
-- [ ] So here we are going to uses llm to generate cold mail.
+### **1️⃣ Extract Job Postings**  
+- Scrape career pages using **LangChain’s WebBaseLoader**.  
 
-Project flow (we are using NIKE)
-- [ ] Extract text from the career , web based loader using langchain
-- [ ] We pass it to llm to generate a json of job role, job skills etc
-- [ ] Store it in Chromadb 
-- [ ] So now we are going to use llm for generating cold email, where we will pass information from db , for a particular job role or description.
+### **2️⃣ Process with LLM**  
+- Pass extracted job descriptions to an **LLM** (ChatGroq).  
+- Generate a structured **JSON** containing:  
+  - Job Role  
+  - Required Skills  
+  - Additional Metadata  
 
+### **3️⃣ Store in ChromaDB**  
+- Store job roles and required skills in **ChromaDB** for efficient retrieval.  
 
-Code Build:
-- [ ] Build a langchain llm call for chatGroq
-- [ ] Extract text from Nike website using Webbed loader provided by langchain
-- [ ] Prompt Template the extracted data, pass it to llm to extract job roles and form it as a JSON formate for further use.
-- [ ] So here for prompt templating and passing it to llm we use a technique “CHAINING” :
+### **4️⃣ Generate Cold Email**  
+- Retrieve relevant job postings from **ChromaDB**.  
+- Use **Prompt Engineering & Chaining** to generate a **personalized cold email**.  
 
+---
 
-Chaining :
-chain_extract = prompt_template | llm
-res = chain_extract.invoke({"page_data": content})
+## **🔹 Code Implementation**  
 
+### **1️⃣ Extract Job Data**
+```python
+from langchain.document_loaders import WebBaseLoader
 
-- [ ] Now create a vector db ie - chromadb
-- [ ] Now in the chromdb we add our skills with their respective portfolios.
-- [ ] Now we use this chroma db for vector search for the particular skills in the web extracted data skills.
+loader = WebBaseLoader("https://example.com/careers")
+content = loader.load()
+```
 
-links = collection.query(query_texts=job["skills"], n_results=2).get('metadatas', [])
-links
+### **2️⃣ LLM Processing (Job Role & Skills Extraction)**
+```python
+from langchain.chains import LLMChain
+from langchain.prompts import PromptTemplate
 
+prompt_template = PromptTemplate.from_template("Extract job roles and skills from: {page_data}")
+chain_extract = prompt_template | llm  
+result = chain_extract.invoke({"page_data": content})
+```
 
-- [ ] Now using PromptTemplate.from_template
-- [ ] We formate a template with a prompt , links, job description
+### **3️⃣ Store in ChromaDB**
+```python
+import chromadb
 
+chroma_client = chromadb.PersistentClient(path="./chroma_db")
+collection = chroma_client.get_or_create_collection("job_roles")
 
-chain_email = prompt_email | llm
-res = chain_email.invoke({"job_description": str(job), "link_list": links})
-print(res.content)
+collection.add(
+    documents=[result["job_role"]],
+    metadatas=[{"skills": result["skills"]}],
+    ids=["job_123"]
+)
+```
 
-Now we have Cold Email
+### **4️⃣ Retrieve & Generate Cold Email**
+```python
+links = collection.query(query_texts=result["skills"], n_results=2).get('metadatas', [])
+prompt_email = PromptTemplate.from_template("Generate a cold email for: {job_description} with references {link_list}")
+
+chain_email = prompt_email | llm  
+email_result = chain_email.invoke({"job_description": str(result), "link_list": links})
+
+print(email_result.content)
+```
+
+---
+
+## **🔹 Technologies Used**  
+✅ **LangChain** → Extracting job data & structuring responses  
+✅ **ChromaDB** → Storing & retrieving job information efficiently  
+✅ **ChatGroq (LLM)** → Generating structured data & personalized cold emails  
+✅ **Prompt Engineering & Chaining** → Automating workflow  
+
+---
+
+## **🚀 Outcome**  
+By combining **LLMs, vector databases, and prompt engineering**, this system can efficiently generate **targeted, data-driven cold emails** for business outreach.  
+
+Let me know if you need further refinements! 😊
