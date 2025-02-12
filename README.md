@@ -83,7 +83,7 @@ print(email_result.content)
 
 ### **5️⃣ Deploy with Streamlit**
 ```python
-streamli run main.py
+streamlit run main.py
 ```
 
 ---
